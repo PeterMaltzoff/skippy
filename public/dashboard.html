@@ -6,8 +6,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles-dashboard.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
 <body class="min-h-screen cyber-grid font-['Orbitron']">
+  <div id="cyber-car">
+    <div class="car-body">
+      <div class="neon-glow cyan"></div>
+      <div class="headlights"></div>
+      <div class="taillights"></div>
+    </div>
+    <div class="hover-effects">
+      <div class="thrust-particles"></div>
+    </div>
+  </div>
+  
+  <canvas id="physics-world"></canvas>
+
   <div class="floating-characters">
     <span>サイバー</span>
     <span>コア</span>
@@ -44,5 +58,7 @@
       </a>
     </div>
   </div>
+
+  <script src="car-physics.js"></script>
 </body>
 </html> 
