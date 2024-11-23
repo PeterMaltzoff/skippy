@@ -71,7 +71,6 @@ app.post('/timeComplexity', async (req, res) => {
 
     // Extract only the numeric value from the response
     const timeToComplete = parseInt(response.data.response.replace(/\D/g, ''));
-    console.log(timeToComplete);
     res.json({ timeToComplete });
 
   } catch (error) {
@@ -92,7 +91,7 @@ app.post('/decompose', async (req, res) => {
     // Decompose into subtasks with context
     const decompositionResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `${contextPrompt} Break down this specific task into 1-4 clear, subtasks. Task: ${task}. Do not include bullet points or numbers and answer each task in plain text where each new task is on a new line.`,
+      prompt: `${contextPrompt} Break down this specific task into 1-4 clear, subtasks. You are very lazy and you make a lot of assumtions. Avoid rabit holes. Task: ${task}. Do not include bullet points or numbers and answer each task in plain text where each new task is on a new line. Only answer with tasks, no other text. Always attempt to reduce complexity on each subtask.`,
       stream: false
     });
 
