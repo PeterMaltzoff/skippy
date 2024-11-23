@@ -59,8 +59,7 @@ async function decomposeNode(node) {
   // Get the full path of parent tasks up to the root
   const parentPath = getParentPath(node);
   
-  // Get the current complexity threshold
-  const complexityThreshold = parseInt(document.getElementById('complexity-threshold').value);
+  const timeThreshold = parseInt(document.getElementById('time-threshold').value);
 
   const response = await fetch('/decompose', {
     method: 'POST',
@@ -68,7 +67,7 @@ async function decomposeNode(node) {
     body: JSON.stringify({ 
       task: node.task,
       parentPath: parentPath,
-      complexityThreshold: complexityThreshold
+      timeThreshold: timeThreshold
     })
   });
   

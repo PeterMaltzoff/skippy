@@ -26,15 +26,13 @@
       
       <div class="flex justify-end gap-4 mb-8">
         <div class="flex-1 flex items-center gap-4 text-blue-300">
-          <label>Complexity Threshold:</label>
-          <input type="range" 
-                 id="complexity-threshold" 
+          <label>Time Threshold (seconds):</label>
+          <input type="number" 
+                 id="time-threshold" 
                  min="1" 
-                 max="10" 
-                 value="5"
-                 class="w-48 accent-blue-400 bg-blue-900/20 rounded-lg"
+                 value="30"
+                 class="w-24 bg-slate-800/60 text-blue-300 border border-blue-300/50 rounded-lg p-2 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
           />
-          <span id="threshold-value" class="w-8 text-center">5</span>
         </div>
         <button onclick="clearDecomposition()" 
                 class="bg-red-400/20 hover:bg-red-400/40 text-red-300 px-6 py-3 rounded-lg border border-red-300/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(248,113,113,0.5)]">
