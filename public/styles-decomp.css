@@ -95,4 +95,40 @@ svg path {
 
 svg path:hover {
   stroke-opacity: 0.8;
+}
+
+input[type="range"] {
+  height: 6px;
+  border-radius: 3px;
+  appearance: none;
+  background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #60a5fa;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 5px #60a5fa,
+    0 0 10px #60a5fa,
+    0 0 15px #60a5fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 0 10px #60a5fa,
+    0 0 20px #60a5fa,
+    0 0 30px #60a5fa;
+}
+
+#threshold-value {
+  font-family: 'Orbitron', sans-serif;
+  text-shadow: 0 0 5px #60a5fa;
 } 

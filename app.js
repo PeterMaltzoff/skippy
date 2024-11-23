@@ -56,7 +56,7 @@ app.get('/decomposition', (req, res) => {
 
 app.post('/decompose', async (req, res) => {
   try {
-    const { task, parentPath } = req.body;
+    const { task, parentPath, complexityThreshold } = req.body;
     
     // Create a context-aware prompt using the parent path
     const contextPrompt = parentPath.length > 1 
@@ -66,11 +66,30 @@ app.post('/decompose', async (req, res) => {
     // First, check if the task is atomic with context
     const atomicCheckResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `${contextPrompt} Considering the full context above, determine if this specific task is atomic. Task: "${task}". Consider a task atomic if its something a human can do directly and breaking it down further wouldn't be useful. Respond with only "ATOMIC" or "NON-ATOMIC".`,
+      prompt: `you will classify a given task based on its complexity and level of abstraction. you are provided two variables:
+
+    ${contextPrompt}: a list of parent tasks leading up to the root task, giving you context about the current task.
+    ${task}: the specific task you need to classify.
+
+rate the complexity of ${task} on a scale from 1 to 10:
+
+    1 is a very low-level, atomic action that can be performed directly by a human with minimal effort or thought (e.g., typing text, picking up an object).
+    10 is a high-level, complex action involving multiple steps, significant decision-making, or extended effort (e.g., creating something, completing a process with multiple sub-tasks).
+
+consider the context provided in ${contextPrompt} and analyze whether ${task} is atomic or requires multiple sub-actions.
+
+examples for guidance:
+
+    if ${task} is "type 'cat videos' into youtube" and ${contextPrompt} includes "watch funny videos," rate it as 1 (atomic action).
+    if ${task} is "grow a plant" and ${contextPrompt} includes "develop a sustainable garden," rate it as 8 (multi-step, high abstraction).
+
+respond with a single number (1-10) as your rating.`,
       stream: false
     });
 
-    const isAtomic = !atomicCheckResponse.data.response.trim().includes('NON-ATOMIC');
+    // Extract only the numeric value from the response
+    const complexityRating = parseInt(atomicCheckResponse.data.response.replace(/\D/g, ''));
+    const isAtomic = complexityRating <= complexityThreshold;
 
     if (isAtomic) {
       res.json({ 

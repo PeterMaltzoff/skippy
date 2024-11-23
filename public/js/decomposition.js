@@ -58,13 +58,17 @@ async function decomposeNode(node) {
 
   // Get the full path of parent tasks up to the root
   const parentPath = getParentPath(node);
+  
+  // Get the current complexity threshold
+  const complexityThreshold = parseInt(document.getElementById('complexity-threshold').value);
 
   const response = await fetch('/decompose', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
       task: node.task,
-      parentPath: parentPath
+      parentPath: parentPath,
+      complexityThreshold: complexityThreshold
     })
   });
   
@@ -232,4 +236,8 @@ function stopDecomposition() {
 // Add event listener for Ctrl+Enter to decompose
 document.getElementById('input-text').addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.key === 'Enter') decompose();
+});
+
+document.getElementById('complexity-threshold').addEventListener('input', (e) => {
+  document.getElementById('threshold-value').textContent = e.target.value;
 }); 
