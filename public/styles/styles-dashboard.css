@@ -141,6 +141,10 @@
   background: radial-gradient(circle, #9900ff 0%, transparent 70%);
 }
 
+.neon-glow.blue {
+  background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+}
+
 .module-card:hover .neon-glow {
   opacity: 0.3;
 }

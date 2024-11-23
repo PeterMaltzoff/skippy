@@ -22,6 +22,10 @@ app.get('/architect', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/views', 'architect.html'));
 });
 
+app.get('/skippy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/views', 'skippy.html'));
+});
+
 app.post('/chat', async (req, res) => {
   try {
     const { message } = req.body;

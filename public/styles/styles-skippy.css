@@ -1,0 +1,39 @@
+.cyber-bg-light {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-bg-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(255,192,203,0.1) 2%, transparent 3%),
+    linear-gradient(0deg, transparent 0%, rgba(255,192,203,0.1) 2%, transparent 3%);
+  background-size: 50px 50px;
+  animation: grid-scroll 20s linear infinite;
+  pointer-events: none;
+}
+
+.neon-text-light {
+  color: #ff69b4;
+  text-shadow: 
+    0 0 5px rgba(255,105,180,0.5),
+    0 0 10px rgba(255,105,180,0.3),
+    0 0 15px rgba(255,105,180,0.2);
+  animation: neon-pulse-light 2s infinite;
+}
+
+@keyframes neon-pulse-light {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes grid-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+} 
