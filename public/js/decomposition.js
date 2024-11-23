@@ -70,7 +70,7 @@ function displayTree(node) {
   const simulation = d3.forceSimulation(hierarchy.descendants())
     .force('link', d3.forceLink(hierarchy.links())
       .id(d => d.id)
-      .distance(100)
+      .distance(200)
       .strength(1))
     .force('charge', d3.forceManyBody().strength(-500))
     .force('x', d3.forceX(width / 2))
