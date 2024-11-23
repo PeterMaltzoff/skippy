@@ -99,14 +99,26 @@ function displayTree(data) {
   const width = 800;
   const height = (nodes.length + 1) * nodeSize;
 
+  // Create the SVG container with zoom support
   const svg = d3.create("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [-nodeSize / 2, -nodeSize * 3 / 2, width, height])
-    .attr("style", "max-width: 100%; height: auto; font: 14px 'Orbitron'; overflow: visible;");
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: 40vh; font: 14px 'Orbitron';")
+    .call(d3.zoom()
+      .scaleExtent([0.5, 2]) // Set zoom limits
+      .on("zoom", zoomed));
+
+  // Create a group for the entire visualization
+  const g = svg.append("g");
+
+  // Zoom function
+  function zoomed(event) {
+    g.attr("transform", event.transform);
+  }
 
   // Create links with transition
-  const links = svg.append("g")
+  const links = g.append("g")
     .attr("fill", "none")
     .attr("stroke", "#60A5FA")
     .attr("stroke-opacity", 0.4)
@@ -124,7 +136,7 @@ function displayTree(data) {
     .style("opacity", 1);
 
   // Create nodes with transition
-  const node = svg.append("g")
+  const node = g.append("g")
     .selectAll("g")
     .data(nodes)
     .join("g")
