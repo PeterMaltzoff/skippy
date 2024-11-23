@@ -10,20 +10,40 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
 app.post('/chat', async (req, res) => {
   try {
     const { message } = req.body;
     
+    // Set headers for streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
     const response = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
       prompt: message,
-      stream: false
+      stream: true
+    }, {
+      responseType: 'stream'
     });
 
-    res.json({ response: response.data.response });
+    response.data.on('data', chunk => {
+      const data = JSON.parse(chunk.toString());
+      if (data.response) {
+        res.write(`data: ${JSON.stringify({ response: data.response })}\n\n`);
+      }
+      if (data.done) {
+        res.end();
+      }
+    });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to get response from Ollama' });

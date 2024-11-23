@@ -7,13 +7,43 @@ async function sendMessage() {
   addToChat('USER', message);
   
   try {
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'flex flex-col space-y-1 animate-fade-in';
+    messageContainer.innerHTML = `
+      <div class="text-sm text-green-400 font-bold">[SYSTEM]</div>
+      <div class="bg-black/40 rounded p-3 border border-green-500/20">
+        <p class="font-normal"></p>
+      </div>
+    `;
+    
+    document.getElementById('chat-history').appendChild(messageContainer);
+    const textEl = messageContainer.querySelector('p');
+    let fullResponse = '';
+
     const response = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message })
     });
-    const data = await response.json();
-    addToChat('SYSTEM', data.response);
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = JSON.parse(line.slice(6));
+          fullResponse += data.response;
+          textEl.textContent = fullResponse;
+        }
+      }
+    }
   } catch (error) {
     console.error('Error:', error);
     addToChat('ERROR', 'Neural link disconnected. Retry transmission.');

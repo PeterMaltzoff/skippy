@@ -1,0 +1,56 @@
+.neural-grid {
+  background: 
+    linear-gradient(to right, rgba(0,0,0,0.9) 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(to bottom, rgba(0,0,0,0.9) 1px, transparent 1px) 0 0 / 50px 50px,
+    radial-gradient(circle at center, rgba(0,20,0,0.9) 0%, rgba(0,0,0,0.95) 100%);
+}
+
+.power-text {
+  background: linear-gradient(90deg, #00ff00, #00ffff, #0099ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 
+    0 0 10px rgba(0,255,0,0.5),
+    0 0 20px rgba(0,255,0,0.3),
+    0 0 30px rgba(0,255,0,0.2);
+  animation: powerPulse 4s infinite;
+}
+
+.power-glow {
+  position: absolute;
+  top: 50%;
+  left: -100%;
+  width: 300%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(0,255,0,0.1) 0%, transparent 70%);
+  transform: translateY(-50%);
+  animation: powerFlow 8s infinite;
+  pointer-events: none;
+}
+
+.power-glow.blue {
+  background: radial-gradient(circle at center, rgba(0,149,255,0.1) 0%, transparent 70%);
+}
+
+.module-card:hover .power-glow {
+  animation: powerFlow 3s infinite;
+}
+
+@keyframes powerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes powerFlow {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+.module-card {
+  transition: transform 0.3s;
+}
+
+.module-card:hover {
+  transform: scale(1.02);
+} 
