@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html class="bg-black">
+<head>
+  <title>Neural Link // Architect Interface</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/public/styles-architect.css">
+</head>
+<body class="min-h-screen cyber-bg font-['Orbitron']">
+  <div class="container mx-auto p-4">
+    <nav class="mb-8">
+      <a href="/" class="text-cyan-300 hover:text-cyan-400 transition-colors">&lt; Back to Neural Core</a>
+    </nav>
+    
+    <h1 class="text-4xl font-bold text-center mb-8 neon-text-cyan">NEURAL ARCHITECT v1.0</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Game Canvas -->
+      <div class="lg:col-span-2 bg-black/60 rounded-lg border border-cyan-500/30 p-4">
+        <canvas id="gameCanvas" class="w-full aspect-video bg-black rounded border border-cyan-500/20"></canvas>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="space-y-4">
+        <!-- Chat Interface -->
+        <div class="h-[40vh] bg-black/60 rounded-lg border border-cyan-500/30 p-4 overflow-y-auto" id="chatHistory">
+          <div class="text-cyan-300/50 text-sm">
+            Welcome to Neural Architect. Begin by describing game elements to add...
+          </div>
+          <div class="text-cyan-300/50 text-sm mt-2">
+            Suggestions:
+            • Add enemies that chase the player
+            • Create a maze-like environment
+            • Add power-ups or collectibles
+            • Implement shooting mechanics
+            • Add particle effects
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="commandInput"
+            class="flex-1 bg-black/60 text-cyan-300 border border-cyan-500/30 rounded-lg p-3 font-['Source_Code_Pro'] focus:outline-none focus:border-cyan-400"
+            placeholder="Describe game elements to manifest..."
+          >
+          <button 
+            onclick="sendCommand()"
+            class="bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 px-6 py-2 rounded-lg border border-cyan-500/50 transition-all duration-300">
+            BUILD
+          </button>
+        </div>
+
+        <!-- Code Preview -->
+        <div class="bg-black/60 rounded-lg border border-cyan-500/30 p-4">
+          <div class="text-cyan-400 text-sm mb-2">GENERATED CODE:</div>
+          <pre id="codePreview" class="text-xs font-['Source_Code_Pro'] text-cyan-300/70 overflow-x-auto"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/architect.js"></script>
+</body>
+</html>

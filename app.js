@@ -8,6 +8,7 @@ const port = 3000;
 
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
@@ -15,6 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/chat', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+});
+
+app.get('/architect', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'architect.html'));
 });
 
 app.post('/chat', async (req, res) => {
@@ -104,6 +109,23 @@ app.post('/decompose', async (req, res) => {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to decompose task' });
   }
+});
+
+app.post('/architect/generate', async (req, res) => {
+  const { command, currentState } = req.body;
+  
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // For now, just send back a test response
+  res.write('data: ' + JSON.stringify({
+    message: "I received your command: " + command,
+    code: "// Code will be generated here\n",
+    complete: true
+  }) + '\n\n');
+  
+  res.end();
 });
 
 app.listen(port, () => {
