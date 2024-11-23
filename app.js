@@ -38,15 +38,41 @@ app.post('/decompose', async (req, res) => {
   try {
     const { task } = req.body;
     
-    const response = await axios.post('http://localhost:11434/api/generate', {
+    // First, check if the task is atomic
+    const atomicCheckResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `Break down this task into clear, sequential steps: ${task}`,
+      prompt: `Determine if this task is atomic (cannot be broken down further and can be directly executed on a computer). Task: "${task}". Respond with only "ATOMIC" or "NON-ATOMIC".`,
       stream: false
     });
 
-    const steps = response.data.response.split('\n').filter(step => step.trim());
-    
-    res.json({ steps });
+    const isAtomic = !atomicCheckResponse.data.response.trim().includes('NON-ATOMIC');
+
+    if (isAtomic) {
+      res.json({ 
+        isAtomic: true,
+        task: task,
+        children: []
+      });
+      return;
+    }
+
+    // If non-atomic, decompose into subtasks
+    const decompositionResponse = await axios.post('http://localhost:11434/api/generate', {
+      model: 'llama3.2:3b',
+      prompt: `Break down this task into 2-5 clear, sequential subtasks. Format each subtask on a new line with no numbers or bullets: ${task}`,
+      stream: false
+    });
+
+    const subtasks = decompositionResponse.data.response
+      .split('\n')
+      .filter(step => step.trim());
+
+    res.json({
+      isAtomic: false,
+      task: task,
+      children: subtasks
+    });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to decompose task' });
