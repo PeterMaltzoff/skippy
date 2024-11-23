@@ -56,11 +56,29 @@ async function decomposeNode(node) {
   const currentData = convertToD3Data(taskTree);
   displayTree(currentData);
 
+  // First, check time complexity
+  const timeResponse = await fetch('/timeComplexity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task: node.task })
+  });
+  
+  const timeData = await timeResponse.json();
+  const timeThreshold = parseInt(document.getElementById('time-threshold').value);
+  
+  // Store the time complexity
+  node.timeComplexity = timeData.timeToComplete;
+  
+  // If time complexity is below threshold, mark as atomic and stop
+  if (timeData.timeToComplete <= timeThreshold) {
+    node.isAtomic = true;
+    return;
+  }
+
   // Get the full path of parent tasks up to the root
   const parentPath = getParentPath(node);
   
-  const timeThreshold = parseInt(document.getElementById('time-threshold').value);
-
+  // If not atomic, decompose the task
   const response = await fetch('/decompose', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -72,21 +90,18 @@ async function decomposeNode(node) {
   });
   
   const data = await response.json();
-  node.isAtomic = data.isAtomic;
+  node.children = data.children.map(task => new TreeNode(task));
+  await delay(10);
   
-  if (!node.isAtomic) {
-    node.children = data.children.map(task => new TreeNode(task));
-    await delay(10);
-    
-    const updatedData = convertToD3Data(taskTree);
-    displayTree(updatedData);
+  const updatedData = convertToD3Data(taskTree);
+  displayTree(updatedData);
 
-    for (const child of node.children) {
-      if (!isDecomposing) {
-        throw new Error('Decomposition stopped by user');
-      }
-      await decomposeNode(child);
+  // Recursively decompose children
+  for (const child of node.children) {
+    if (!isDecomposing) {
+      throw new Error('Decomposition stopped by user');
     }
+    await decomposeNode(child);
   }
 }
 
@@ -121,6 +136,7 @@ function convertToD3Data(node) {
   return {
     name: node.task,
     isAtomic: node.isAtomic,
+    timeComplexity: node.timeComplexity,
     children: node.children.map(child => convertToD3Data(child))
   };
 }
@@ -197,7 +213,10 @@ function displayTree(data) {
     .attr("x", d => d.depth * nodeSize * 1.5 + 8)
     .attr("class", "text-sm")
     .attr("fill", d => d.data.isAtomic ? "#4ADE80" : "#60A5FA")
-    .text(d => d.data.name);
+    .text(d => {
+      const timeText = d.data.timeComplexity ? ` [${d.data.timeComplexity}s]` : '';
+      return d.data.name + timeText;
+    });
 
   // Add hover tooltips showing full path
   node.selection()

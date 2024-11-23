@@ -54,40 +54,40 @@ app.get('/decomposition', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'decomposition.html'));
 });
 
+app.post('/timeComplexity', async (req, res) => {
+  try {
+    const { task } = req.body;
+    
+    const response = await axios.post('http://localhost:11434/api/generate', {
+      model: 'llama3.2:3b',
+      prompt: `estimate the time it would take to do the task: ${task}. Answer tersly with a number in seconds. Dont reply with anything else. Dont even give the units, only the number of seconds.`,
+      stream: false
+    });
+
+    // Extract only the numeric value from the response
+    const timeToComplete = parseInt(response.data.response.replace(/\D/g, ''));
+    console.log(timeToComplete);
+    res.json({ timeToComplete });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to estimate time complexity' });
+  }
+});
+
 app.post('/decompose', async (req, res) => {
   try {
-    const { task, parentPath, complexityThreshold } = req.body;
+    const { task, parentPath, timeThreshold } = req.body;
     
     // Create a context-aware prompt using the parent path
     const contextPrompt = parentPath.length > 1 
       ? `Given the task hierarchy:\n${parentPath.join(' > ')}\n\n` 
       : '';
     
-    // First, check if the task is atomic with context
-    const atomicCheckResponse = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama3.2:3b',
-      prompt: `estimate the time it would take to do the task: ${task}. Answer with a number in seconds.`,
-      stream: false
-    });
-
-    // Extract only the numeric value from the response
-    const timeToComplete = parseInt(atomicCheckResponse.data.response.replace(/\D/g, ''));
-    const isAtomic = timeToComplete <= complexityThreshold;
-
-    if (isAtomic) {
-      res.json({ 
-        isAtomic: true,
-        task: task,
-        children: []
-      });
-      return;
-    }
-
-    // If non-atomic, decompose into subtasks with context
+    // Decompose into subtasks with context
     const decompositionResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `This task will take ${timeToComplete} seconds to complete. 
-      ${contextPrompt} Given the above context, break down this specific task into 1-4 clear, subtasks that will take less than ${complexityThreshold} seconds to complete. Task: ${task}. Do not include bullet poitns or numbers and answer each task in plain text where each new task is on a new line.`,
+      prompt: `${contextPrompt} Break down this specific task into 1-4 clear, subtasks. Task: ${task}. Do not include bullet points or numbers and answer each task in plain text where each new task is on a new line.`,
       stream: false
     });
 
@@ -96,7 +96,6 @@ app.post('/decompose', async (req, res) => {
       .filter(step => step.trim());
 
     res.json({
-      isAtomic: false,
       task: task,
       children: subtasks
     });

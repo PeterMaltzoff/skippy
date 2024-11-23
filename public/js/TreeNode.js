@@ -3,5 +3,6 @@ class TreeNode {
     this.task = task;
     this.children = [];
     this.isAtomic = false;
+    this.timeComplexity = null;
   }
 } 
