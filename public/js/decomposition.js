@@ -11,9 +11,34 @@ async function decompose() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task: inputText })
     });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
     
-    const data = await response.json();
-    displayDecomposition(data.steps);
+    resultDiv.innerHTML = '';
+    const tempDiv = document.createElement('div');
+    resultDiv.appendChild(tempDiv);
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = JSON.parse(line.slice(6));
+          if (data.done) {
+            displayDecomposition(data.steps);
+          } else {
+            buffer += data.response;
+            tempDiv.textContent = buffer;
+          }
+        }
+      }
+    }
   } catch (error) {
     console.error('Error:', error);
     resultDiv.innerHTML = '<div class="text-red-400">Decomposition failed. Please try again.</div>';

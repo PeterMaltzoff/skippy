@@ -21,13 +21,29 @@ app.post('/chat', async (req, res) => {
   try {
     const { message } = req.body;
     
+    // Set headers for streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
     const response = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
       prompt: message,
-      stream: false
+      stream: true
+    }, {
+      responseType: 'stream'
     });
 
-    res.json({ response: response.data.response });
+    response.data.on('data', chunk => {
+      const data = JSON.parse(chunk.toString());
+      if (data.response) {
+        res.write(`data: ${JSON.stringify({ response: data.response })}\n\n`);
+      }
+      if (data.done) {
+        res.end();
+      }
+    });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to get response from Ollama' });
@@ -42,15 +58,33 @@ app.post('/decompose', async (req, res) => {
   try {
     const { task } = req.body;
     
+    // Set headers for streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
     const response = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
       prompt: `Break down this task into clear, sequential steps: ${task}`,
-      stream: false
+      stream: true
+    }, {
+      responseType: 'stream'
     });
 
-    const steps = response.data.response.split('\n').filter(step => step.trim());
-    
-    res.json({ steps });
+    let buffer = '';
+    response.data.on('data', chunk => {
+      const data = JSON.parse(chunk.toString());
+      if (data.response) {
+        buffer += data.response;
+        res.write(`data: ${JSON.stringify({ response: data.response })}\n\n`);
+      }
+      if (data.done) {
+        const steps = buffer.split('\n').filter(step => step.trim());
+        res.write(`data: ${JSON.stringify({ done: true, steps })}\n\n`);
+        res.end();
+      }
+    });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to decompose task' });
