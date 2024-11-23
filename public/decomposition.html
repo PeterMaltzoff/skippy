@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html class="bg-slate-900">
+<head>
+  <title>Neural Link // Decomposition Interface</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles-decomp.css">
+</head>
+<body class="min-h-screen cyber-bg font-['Orbitron']">
+  <div class="container mx-auto p-4">
+    <nav class="mb-8">
+      <a href="/" class="text-blue-300 hover:text-blue-400 transition-colors">&lt; Back to Neural Link</a>
+    </nav>
+    
+    <h1 class="text-4xl font-bold text-center mb-8 neon-text">NEURAL DECOMPOSITION v1.0</h1>
+    
+    <div class="max-w-4xl mx-auto bg-white/10 rounded-lg border border-blue-300/50 p-6 backdrop-blur-sm">
+      <div class="mb-6">
+        <textarea 
+          id="input-text" 
+          rows="4" 
+          class="w-full bg-slate-800/60 text-blue-300 border border-blue-300/50 rounded-lg p-3 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder-blue-700"
+          placeholder="Enter complex task for decomposition..."></textarea>
+      </div>
+      
+      <div class="flex justify-end gap-4 mb-8">
+        <button onclick="clearDecomposition()" 
+                class="bg-red-400/20 hover:bg-red-400/40 text-red-300 px-6 py-3 rounded-lg border border-red-300/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(248,113,113,0.5)]">
+          CLEAR
+        </button>
+        <button onclick="decompose()" 
+                class="bg-blue-400/20 hover:bg-blue-400/40 text-blue-300 px-6 py-3 rounded-lg border border-blue-300/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(96,165,250,0.5)]">
+          DECOMPOSE
+        </button>
+      </div>
+
+      <div id="decomposition-result" class="space-y-4 min-h-[40vh] bg-slate-800/60 rounded-lg p-4 border border-blue-300/30">
+        <div class="text-blue-300 text-center opacity-50">Awaiting input for decomposition...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/decomposition.js"></script>
+</body>
+</html> 
