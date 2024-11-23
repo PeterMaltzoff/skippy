@@ -1,0 +1,17 @@
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.glitch-text:hover {
+  animation: glitch 0.3s linear infinite;
+  text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff;
+}
+
+.matrix-bg {
+  background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,32,0,0.95) 100%);
+} 
