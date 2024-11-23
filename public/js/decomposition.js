@@ -44,12 +44,24 @@ function displayTree(node) {
   const width = resultDiv.offsetWidth;
   const height = Math.max(500, window.innerHeight * 0.6);
 
-  // Create SVG container
+  // Create SVG container with zoom support
   const svg = d3.select('#decomposition-result')
     .append('svg')
     .attr('width', width)
     .attr('height', height)
     .attr('class', 'bg-slate-800/60 rounded-lg');
+
+  // Add zoom behavior
+  const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .on('zoom', (event) => {
+      g.attr('transform', event.transform);
+    });
+
+  svg.call(zoom);
+
+  // Create a container group for all elements
+  const g = svg.append('g');
 
   // Create the hierarchical data structure D3 expects
   const hierarchy = d3.hierarchy(convertToD3Format(node));
@@ -65,7 +77,7 @@ function displayTree(node) {
     .force('y', d3.forceY(height / 2));
 
   // Create links
-  const links = svg.append('g')
+  const links = g.append('g')
     .selectAll('line')
     .data(hierarchy.links())
     .join('line')
@@ -73,7 +85,7 @@ function displayTree(node) {
     .attr('stroke-width', 1);
 
   // Create nodes
-  const nodes = svg.append('g')
+  const nodes = g.append('g')
     .selectAll('g')
     .data(hierarchy.descendants())
     .join('g')
@@ -89,14 +101,14 @@ function displayTree(node) {
     .attr('ry', 6)
     .attr('stroke-width', 1);
 
-  // Add text labels
+  // Add text labels with smaller font size
   const nodeTexts = nodes.append('text')
-    .attr('class', 'text-sm text-blue-200 pointer-events-none')
+    .attr('class', 'text-[10px] text-blue-200 pointer-events-none')
     .attr('dy', '0.35em')
     .attr('text-anchor', 'middle')
     .text(d => d.data.task)
     .each(function(d) {
-      const padding = 10;
+      const padding = 8;
       const bbox = this.getBBox();
       d.width = bbox.width + padding * 2;
       d.height = bbox.height + padding * 2;
@@ -109,11 +121,11 @@ function displayTree(node) {
     .attr('x', d => -d.width / 2)
     .attr('y', d => -d.height / 2);
 
-  // Add atomic/expand indicators
+  // Add atomic/expand indicators with smaller font
   nodes.append('text')
-    .attr('class', 'text-xs pointer-events-none')
+    .attr('class', 'text-[8px] pointer-events-none')
     .attr('text-anchor', 'middle')
-    .attr('dy', d => (d.height / 2) + 16)
+    .attr('dy', d => (d.height / 2) + 12)
     .attr('fill', d => d.data.isAtomic ? '#34d399' : '#60a5fa')
     .text(d => d.data.isAtomic ? '[Atomic]' : 
       (!d.data.isAtomic && !d.children?.length ? '[Expand]' : ''));
@@ -139,6 +151,25 @@ function displayTree(node) {
       }
     }
   });
+
+  // Add zoom controls
+  const zoomControls = d3.select('#decomposition-result')
+    .append('div')
+    .attr('class', 'absolute bottom-4 right-4 flex gap-2');
+
+  zoomControls.append('button')
+    .attr('class', 'bg-blue-400/20 hover:bg-blue-400/40 text-blue-300 px-3 py-2 rounded-lg border border-blue-300/50')
+    .text('+')
+    .on('click', () => {
+      svg.transition().call(zoom.scaleBy, 1.5);
+    });
+
+  zoomControls.append('button')
+    .attr('class', 'bg-blue-400/20 hover:bg-blue-400/40 text-blue-300 px-3 py-2 rounded-lg border border-blue-300/50')
+    .text('-')
+    .on('click', () => {
+      svg.transition().call(zoom.scaleBy, 0.75);
+    });
 }
 
 // Helper function to convert our tree format to D3 format
