@@ -46,4 +46,53 @@ button::after {
 @keyframes shine {
   0% { transform: translateX(-100%) rotate(45deg); }
   100% { transform: translateX(100%) rotate(45deg); }
+}
+
+svg text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  text-shadow: 0 0 2px currentColor;
+  transition: text-shadow 0.3s ease;
+}
+
+.node circle {
+  fill: #60A5FA;
+  stroke: #60A5FA;
+  stroke-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.node circle:hover {
+  filter: brightness(1.2);
+  r: 6;
+}
+
+.link {
+  transition: stroke-opacity 0.3s ease;
+}
+
+.link:hover {
+  stroke-opacity: 0.8;
+}
+
+.node-circle {
+  transition: r 0.3s ease, fill 0.3s ease;
+  filter: drop-shadow(0 0 2px currentColor);
+}
+
+.node-circle:hover {
+  r: 6;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+svg text:hover {
+  text-shadow: 0 0 4px currentColor;
+}
+
+svg path {
+  transition: stroke-opacity 0.3s ease;
+}
+
+svg path:hover {
+  stroke-opacity: 0.8;
 } 
