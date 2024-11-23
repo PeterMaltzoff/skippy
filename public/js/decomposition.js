@@ -77,7 +77,7 @@ function displayTree(data) {
   resultDiv.innerHTML = '';
 
   const nodeSize = 25;
-  const root = d3.hierarchy(data);
+  const root = d3.hierarchy(data).eachBefore((i => d => d.index = i++)(0));
   const nodes = root.descendants();
   const width = 800;
   const height = (nodes.length + 1) * nodeSize;
@@ -98,8 +98,8 @@ function displayTree(data) {
     .join("path")
     .style("opacity", 0)
     .attr("d", d => `
-      M${d.source.depth * nodeSize * 1.5},${d.source.x * nodeSize}
-      V${d.target.x * nodeSize}
+      M${d.source.depth * nodeSize * 1.5},${d.source.index * nodeSize}
+      V${d.target.index * nodeSize}
       h${nodeSize * 1.5}
     `)
     .transition()
@@ -111,26 +111,33 @@ function displayTree(data) {
     .selectAll("g")
     .data(nodes)
     .join("g")
-    .attr("transform", d => `translate(0,${d.x * nodeSize})`)
+    .attr("transform", d => `translate(0,${d.index * nodeSize})`)
     .style("opacity", 0)
     .transition()
     .duration(500)
     .style("opacity", 1);
 
   // Add circles for nodes
-  node.selection().append("circle")
+  node.selection()
+    .append("circle")
     .attr("cx", d => d.depth * nodeSize * 1.5)
     .attr("r", 4)
     .attr("fill", d => d.data.isAtomic ? "#4ADE80" : "#60A5FA")
     .attr("class", "node-circle");
 
   // Add text labels
-  node.selection().append("text")
+  node.selection()
+    .append("text")
     .attr("dy", "0.32em")
     .attr("x", d => d.depth * nodeSize * 1.5 + 8)
     .attr("class", "text-sm")
     .attr("fill", d => d.data.isAtomic ? "#4ADE80" : "#60A5FA")
     .text(d => d.data.name);
+
+  // Add hover tooltips showing full path
+  node.selection()
+    .append("title")
+    .text(d => d.ancestors().reverse().map(d => d.data.name).join(" > "));
 
   resultDiv.appendChild(svg.node());
 }
