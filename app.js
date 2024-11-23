@@ -61,7 +61,7 @@ app.post('/chat', async (req, res) => {
     
     // Call Ollama API (assuming it's running on default port 11434)
     const response = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama2',  // or whatever model you have installed
+      model: 'llama3.2:3b',  // Changed to match the model you're running
       prompt: message,
       stream: false
     });
