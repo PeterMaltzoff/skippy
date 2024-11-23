@@ -103,7 +103,13 @@ respond with a single number (1-10) as your rating.`,
     // If non-atomic, decompose into subtasks with context
     const decompositionResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `${contextPrompt} Given the above context, break down this specific task into 2-4 clear, more detailed subtasks. Consider the parent tasks to avoid redundancy and maintain appropriate scope. Your goal is to generate low level tasks that can be directly performed by a human but if you can't do that, generate high level tasks. Task to decompose: "${task}". Format each subtask on a new line with no numbers or bullets.`,
+      prompt: `${contextPrompt} Given the above context, break down this specific task into 1-4 clear, subtasks. Consider the parent tasks to avoid redundancy and maintain appropriate scope. Your goal is to generate low level tasks that can be directly performed by a human but if you can't do that, generate high level tasks. Task to decompose: "${task}". 
+      rate the complexity of ${task} on a scale from 1 to 10:
+
+      1 is a very low-level, atomic action that can be performed directly by a human with minimal effort or thought (e.g., typing text, picking up an object).
+      10 is a high-level, complex action involving multiple steps, significant decision-making, or extended effort (e.g., creating something, completing a process with multiple sub-tasks).
+
+      Format each subtask on a new line with no bullets or numbers. Each sub task should be given a complexity rating from 1 to 10.`,
       stream: false
     });
 
