@@ -53,4 +53,113 @@
 
 .module-card:hover {
   transform: scale(1.02);
+}
+
+.cyberpunk-bg {
+  background: linear-gradient(45deg, #120458, #4a0d67, #7b2288);
+  position: relative;
+}
+
+/* Animated Grid Background */
+.cyber-grid {
+  background-image: 
+    linear-gradient(transparent 0%, rgba(255, 0, 255, 0.2) 2%, transparent 3%),
+    linear-gradient(90deg, transparent 0%, rgba(255, 0, 255, 0.2) 2%, transparent 3%);
+  background-size: 50px 50px;
+  animation: grid-scroll 20s linear infinite;
+}
+
+@keyframes grid-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+/* Neon Text Effect */
+.neon-text {
+  color: #fff;
+  text-shadow: 
+    0 0 5px #fff,
+    0 0 10px #fff,
+    0 0 20px #ff00ff,
+    0 0 30px #ff00ff,
+    0 0 40px #ff00ff;
+  animation: neon-pulse 2s infinite;
+}
+
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Floating Japanese Characters */
+.floating-characters {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-characters span {
+  position: absolute;
+  color: rgba(255, 0, 255, 0.2);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 2rem;
+  animation: float-up 15s linear infinite;
+}
+
+.floating-characters span:nth-child(1) { left: 10%; animation-delay: 0s; }
+.floating-characters span:nth-child(2) { left: 30%; animation-delay: -3s; }
+.floating-characters span:nth-child(3) { left: 60%; animation-delay: -6s; }
+.floating-characters span:nth-child(4) { left: 80%; animation-delay: -9s; }
+
+@keyframes float-up {
+  0% { top: 100%; opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { top: -20%; opacity: 0; }
+}
+
+/* Neon Glow Effect for Cards */
+.neon-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  filter: blur(50px);
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+}
+
+.neon-glow.pink {
+  background: radial-gradient(circle, #ff00ff 0%, transparent 70%);
+}
+
+.neon-glow.purple {
+  background: radial-gradient(circle, #9900ff 0%, transparent 70%);
+}
+
+.module-card:hover .neon-glow {
+  opacity: 0.3;
+}
+
+/* Add backdrop blur to cards */
+.module-card {
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+}
+
+.japanese-accent {
+  font-family: 'Noto Sans JP', sans-serif;
+  color: #ff00ff;
+  text-shadow: 
+    0 0 5px #ff00ff,
+    0 0 10px #ff00ff,
+    0 0 20px #ff00ff;
 } 
