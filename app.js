@@ -56,12 +56,17 @@ app.get('/decomposition', (req, res) => {
 
 app.post('/decompose', async (req, res) => {
   try {
-    const { task } = req.body;
+    const { task, parentPath } = req.body;
     
-    // First, check if the task is atomic
+    // Create a context-aware prompt using the parent path
+    const contextPrompt = parentPath.length > 1 
+      ? `Given the task hierarchy:\n${parentPath.join(' > ')}\n\n` 
+      : '';
+    
+    // First, check if the task is atomic with context
     const atomicCheckResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `Determine if this task is atomic (cannot be broken down further and can be directly executed on a computer). Task: "${task}". Respond with only "ATOMIC" or "NON-ATOMIC".`,
+      prompt: `${contextPrompt} Considering the full context above, determine if this specific task is atomic. Task: "${task}". Consider a task atomic if its something a human can do directly and breaking it down further wouldn't be useful. Respond with only "ATOMIC" or "NON-ATOMIC".`,
       stream: false
     });
 
@@ -76,10 +81,10 @@ app.post('/decompose', async (req, res) => {
       return;
     }
 
-    // If non-atomic, decompose into subtasks
+    // If non-atomic, decompose into subtasks with context
     const decompositionResponse = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2:3b',
-      prompt: `Break down this task into 2-5 clear, sequential subtasks. Format each subtask on a new line with no numbers or bullets: ${task}`,
+      prompt: `${contextPrompt} Given the above context, break down this specific task into 2-4 clear, more detailed subtasks. Consider the parent tasks to avoid redundancy and maintain appropriate scope. Your goal is to generate low level tasks that can be directly performed by a human but if you can't do that, generate high level tasks. Task to decompose: "${task}". Format each subtask on a new line with no numbers or bullets.`,
       stream: false
     });
 

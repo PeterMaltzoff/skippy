@@ -56,10 +56,16 @@ async function decomposeNode(node) {
   const currentData = convertToD3Data(taskTree);
   displayTree(currentData);
 
+  // Get the full path of parent tasks up to the root
+  const parentPath = getParentPath(node);
+
   const response = await fetch('/decompose', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ task: node.task })
+    body: JSON.stringify({ 
+      task: node.task,
+      parentPath: parentPath
+    })
   });
   
   const data = await response.json();
@@ -79,6 +85,33 @@ async function decomposeNode(node) {
       await decomposeNode(child);
     }
   }
+}
+
+// Add this helper function to get the parent path
+function getParentPath(node) {
+  const path = [];
+  let current = node;
+  
+  // Traverse up the tree to find all parents
+  while (current) {
+    path.unshift(current.task);
+    current = findParentNode(current, taskTree);
+  }
+  
+  return path;
+}
+
+// Helper function to find parent node
+function findParentNode(node, root) {
+  if (!root || !root.children) return null;
+  
+  for (const child of root.children) {
+    if (child === node) return root;
+    const parent = findParentNode(node, child);
+    if (parent) return parent;
+  }
+  
+  return null;
 }
 
 function convertToD3Data(node) {
@@ -106,7 +139,7 @@ function displayTree(data) {
     .attr("viewBox", [0, 0, width, height])
     .attr("style", "max-width: 100%; height: 40vh; font: 14px 'Orbitron';")
     .call(d3.zoom()
-      .scaleExtent([0.5, 2]) // Set zoom limits
+      .scaleExtent([0.5, 10]) // Set zoom limits
       .on("zoom", zoomed));
 
   // Create a group for the entire visualization
