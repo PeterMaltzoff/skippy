@@ -11,15 +11,15 @@ app.use(express.static('public'));
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public/views', 'dashboard.html'));
 });
 
 app.get('/chat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+  res.sendFile(path.join(__dirname, 'public/views', 'chat.html'));
 });
 
 app.get('/architect', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'architect.html'));
+  res.sendFile(path.join(__dirname, 'public/views', 'architect.html'));
 });
 
 app.post('/chat', async (req, res) => {
@@ -56,7 +56,7 @@ app.post('/chat', async (req, res) => {
 });
 
 app.get('/decomposition', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'decomposition.html'));
+  res.sendFile(path.join(__dirname, 'public/views', 'decomposition.html'));
 });
 
 app.post('/timeComplexity', async (req, res) => {
