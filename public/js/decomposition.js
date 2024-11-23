@@ -1,7 +1,10 @@
 let taskTree = null;
+let isDecomposing = false;
 
 function clearDecomposition() {
+  isDecomposing = false;
   taskTree = null;
+  document.getElementById('stop-button').classList.add('hidden');
   const resultDiv = document.getElementById('decomposition-result');
   resultDiv.innerHTML = '<div class="text-blue-300 text-center opacity-50">Awaiting input for decomposition...</div>';
 }
@@ -12,18 +15,30 @@ async function decompose() {
 
   const resultDiv = document.getElementById('decomposition-result');
   resultDiv.innerHTML = '<div class="text-blue-300 animate-pulse">Processing decomposition...</div>';
+  
+  document.getElementById('stop-button').classList.remove('hidden');
+  isDecomposing = true;
 
   try {
-    // Initialize tree if it doesn't exist
     taskTree = new TreeNode(inputText);
     await decomposeNode(taskTree);
     
-    // Convert tree structure to D3 hierarchy data
     const data = convertToD3Data(taskTree);
     displayTree(data);
   } catch (error) {
     console.error('Error:', error);
-    resultDiv.innerHTML = '<div class="text-red-400">Decomposition failed. Please try again.</div>';
+    if (error.message === 'Decomposition stopped by user') {
+      // If we have partial results, display them
+      if (taskTree) {
+        const data = convertToD3Data(taskTree);
+        displayTree(data);
+      }
+    } else {
+      resultDiv.innerHTML = '<div class="text-red-400">Decomposition failed. Please try again.</div>';
+    }
+  } finally {
+    document.getElementById('stop-button').classList.add('hidden');
+    isDecomposing = false;
   }
 }
 
@@ -32,10 +47,12 @@ function delay(ms) {
 }
 
 async function decomposeNode(node) {
-  // Add small delay for visual effect
+  if (!isDecomposing) {
+    throw new Error('Decomposition stopped by user');
+  }
+
   await delay(10);
 
-  // Display current state before processing
   const currentData = convertToD3Data(taskTree);
   displayTree(currentData);
 
@@ -50,15 +67,15 @@ async function decomposeNode(node) {
   
   if (!node.isAtomic) {
     node.children = data.children.map(task => new TreeNode(task));
-    // Add small delay after adding children
     await delay(10);
     
-    // Display updated state after adding children
     const updatedData = convertToD3Data(taskTree);
     displayTree(updatedData);
 
-    // Process children sequentially
     for (const child of node.children) {
+      if (!isDecomposing) {
+        throw new Error('Decomposition stopped by user');
+      }
       await decomposeNode(child);
     }
   }
@@ -160,6 +177,11 @@ function findNodeByTask(node, task) {
     if (found) return found;
   }
   return null;
+}
+
+function stopDecomposition() {
+  isDecomposing = false;
+  document.getElementById('stop-button').classList.add('hidden');
 }
 
 // Add event listener for Ctrl+Enter to decompose
