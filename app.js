@@ -202,6 +202,47 @@ app.post('/puppet/task', async (req, res) => {
     // Wait a second for the page to load
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // Inject and execute JavaScript to draw coordinates
+    await page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Configuration
+      const GRID_SPACING = 100;
+      
+      // Set canvas size to viewport size
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      // Style for the coordinates
+      ctx.font = '12px monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      
+      // Draw coordinates in a grid pattern
+      for (let x = 0; x <= canvas.width; x += GRID_SPACING) {
+        for (let y = 0; y <= canvas.height; y += GRID_SPACING) {
+          // Draw text outline
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+          ctx.lineWidth = 3;
+          ctx.strokeText(`${x},${y}`, x + 2, y + 2);
+          
+          // Draw text fill
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.fillText(`${x},${y}`, x + 2, y + 2);
+        }
+      }
+      
+      // Position the canvas as an overlay
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.pointerEvents = 'none';
+      canvas.style.zIndex = '10000';
+      
+      document.body.appendChild(canvas);
+    });
+
     // Take screenshot
     const screenshot = await page.screenshot();
     
