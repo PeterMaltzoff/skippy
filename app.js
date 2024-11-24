@@ -23,7 +23,7 @@ app.get('/architect', (req, res) => {
 });
 
 app.get('/skippy', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/views', 'skippy.html'));
+  res.sendFile(path.join(__dirname, 'public/views/skippy', 'skippy10.html'));
 });
 
 app.post('/chat', async (req, res) => {
