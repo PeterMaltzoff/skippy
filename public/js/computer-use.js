@@ -51,32 +51,37 @@ commandInput.addEventListener('keypress', async (e) => {
     addToTerminal(`> ${command}`);
 
     try {
-      const response = await fetch('/puppet/task', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          width: 1120,
-          height: 1120,
-          processId: 0,
-          task: command
-        })
-      });
+      // Iterate 5 times
+      for (let iteration = 1; iteration <= 5; iteration++) {
+        addToTerminal(`[ITERATION ${iteration}/5] Executing command...`, null, false, false);
+        
+        const response = await fetch('/puppet/task', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            width: 1120,
+            height: 1120,
+            processId: 0,
+            task: command
+          })
+        });
 
-      if (!response.ok) throw new Error('Task failed');
+        if (!response.ok) throw new Error('Task failed');
 
-      const data = await response.json();
+        const data = await response.json();
+        
+        // Create image from base64
+        const imageUrl = `data:image/png;base64,${data.screenshot}`;
+        
+        // Add both the suggestion and screenshot to terminal
+        addToTerminal(`[ITERATION ${iteration}/5] AI Response:`, null, false);
+        addToTerminal(data.suggestion, null, false, true);
+        addToTerminal('Screenshot:', imageUrl);
+      }
       
-      // Create image from base64
-      const imageUrl = `data:image/png;base64,${data.screenshot}`;
-      
-      // Add both the suggestion and screenshot to terminal
-      addToTerminal(`AI Suggestion:`, null, false);
-      addToTerminal(data.suggestion, null, false, true);
-      addToTerminal('Screenshot:', imageUrl);
-      
-      // Update processes after task
+      // Update processes after all iterations
       await updateProcesses();
     } catch (error) {
       addToTerminal('Error: Failed to process task', null, true);
