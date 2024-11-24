@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const path = require('path');
+const puppeteer = require('puppeteer');
 
 const app = express();
 const port = 3000;
@@ -40,7 +41,7 @@ app.post('/chat', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
 
     const response = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama3.2:3b',
+      model: 'llama3.2-vision:11b',
       prompt: message,
       stream: true
     }, {
@@ -72,7 +73,7 @@ app.post('/timeComplexity', async (req, res) => {
     const { task } = req.body;
     
     const response = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama3.2:3b',
+      model: 'llama3.2-vision:11b',
       prompt: `estimate the time it would take to do the task: ${task}. Answer tersly with a number in seconds. Dont reply with anything else. Dont even give the units, only the number of seconds.`,
       stream: false
     });
@@ -98,7 +99,7 @@ app.post('/decompose', async (req, res) => {
     
     // Decompose into subtasks with context
     const decompositionResponse = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama3.2:3b',
+      model: 'llama3.2-vision:11b',
       prompt: `${contextPrompt} Break down this specific task into 1-4 clear, subtasks. You are very lazy and you make a lot of assumtions. You are so lazy you dont even state your assumitons. Avoid rabit holes. Task: ${task}. Do not include bullet points or numbers and answer each task in plain text where each new task is on a new line. Only answer with tasks, no other text. Always attempt to reduce complexity on each subtask.`,
       stream: false
     });
@@ -133,6 +134,46 @@ app.post('/architect/generate', async (req, res) => {
   }) + '\n\n');
   
   res.end();
+});
+
+app.post('/screenshot', async (req, res) => {
+  try {
+    const { width, height } = req.body;
+    
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    
+    // Set viewport size
+    await page.setViewport({ width, height });
+    
+    // Navigate to current page (you might need to adjust this URL)
+    // await page.goto('http://localhost:3000' + req.headers.referer.split('3000')[1]);
+    
+    // // Wait for content to load
+    // await page.waitForSelector('.cyber-grid');
+    
+    // Test with YouTube
+    await page.goto('https://youtube.com');
+    
+    // Wait for YouTube content to load
+    await page.waitForSelector('#content');
+    
+    // Take screenshot
+    const screenshot = await page.screenshot();
+    
+    await browser.close();
+    
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': screenshot.length
+    });
+    
+    res.end(screenshot);
+    
+  } catch (error) {
+    console.error('Screenshot error:', error);
+    res.status(500).json({ error: 'Failed to capture screenshot' });
+  }
 });
 
 app.listen(port, () => {
