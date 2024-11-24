@@ -253,7 +253,7 @@ app.post('/puppet/task', async (req, res) => {
     const response = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2-vision:11b',
       role: 'user',
-      prompt: `The users instruction is "${task}". Based on this pixel labeled image of a computer screen, write puppeteer code to perform the next step of the task. You already have the page open. Dont close when done.`,
+      prompt: `The users instruction is "${task}". Based on this pixel labeled image of a computer screen, write puppeteer code to perform the next step of the task.`,
       images: [base64Image],
       stream: false
     });
@@ -268,6 +268,9 @@ app.post('/puppet/task', async (req, res) => {
     } else {
       console.log(`No code block found in response: ${suggestion}`);
     }
+
+    // Clean up the Puppeteer code
+    code = await cleanPuppeteerCode(code);
 
     res.json({ 
       suggestion: code,
@@ -288,3 +291,23 @@ process.on('SIGINT', async () => {
   await browserManager.stopAllProcesses();
   process.exit();
 });
+
+async function cleanPuppeteerCode(code) {
+  console.log(`Cleaning up puppeteer code: ${code}`);
+  const response = await axios.post('http://localhost:11434/api/generate', {
+    model: 'llama3.2-vision:11b',
+    role: 'user',
+    prompt: `Clean up the following puppeteer code: ${code}. Remove any comments and remove all imports and initializations of browser and page. Remove the first page.goto if present. Also remove any closing brackets and browser.close().`,
+    stream: false
+  });
+
+  // Look for code block between triple backticks
+  const codeMatch = response.data.response.match(/```(?:javascript|js)?\s*([\s\S]*?)\s*```/);
+  if (codeMatch) {
+    code = codeMatch[1].trim();
+  } else {
+    console.log(`No code block found in response: ${response.data.response}`);
+  }
+  
+  return code.trim();
+}

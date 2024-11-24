@@ -73,7 +73,8 @@ commandInput.addEventListener('keypress', async (e) => {
       const imageUrl = `data:image/png;base64,${data.screenshot}`;
       
       // Add both the suggestion and screenshot to terminal
-      addToTerminal(`AI Suggestion: ${data.suggestion}`);
+      addToTerminal(`AI Suggestion:`, null, false);
+      addToTerminal(data.suggestion, null, false, true);
       addToTerminal('Screenshot:', imageUrl);
       
       // Update processes after task
@@ -90,15 +91,26 @@ document.addEventListener('DOMContentLoaded', updateProcesses);
 // Update processes every 5 seconds
 setInterval(updateProcesses, 5000);
 
-function addToTerminal(text, imageUrl = null, isError = false) {
+function addToTerminal(text, imageUrl = null, isError = false, isCode = false) {
   const div = document.createElement('div');
   div.className = `mb-2 ${isError ? 'text-red-400' : 'text-purple-300'}`;
 
-  if (imageUrl) {
+  if (isCode) {
+    // Create pre and code elements for syntax highlighting
+    const pre = document.createElement('pre');
+    pre.className = 'my-4 rounded';
+    const code = document.createElement('code');
+    code.className = 'language-javascript';
+    code.textContent = text;
+    pre.appendChild(code);
+    div.appendChild(pre);
+    
+    // Apply Prism highlighting
+    Prism.highlightElement(code);
+  } else if (imageUrl) {
     const container = document.createElement('div');
     container.className = 'mt-2 mb-4';
     
-    // Create thumbnail
     const thumbnail = document.createElement('img');
     thumbnail.src = imageUrl;
     thumbnail.className = 'w-64 h-64 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity';
@@ -108,11 +120,12 @@ function addToTerminal(text, imageUrl = null, isError = false) {
     container.appendChild(div);
     container.appendChild(thumbnail);
     terminal.appendChild(container);
+    return;
   } else {
     div.textContent = text;
-    terminal.appendChild(div);
   }
 
+  terminal.appendChild(div);
   terminal.scrollTop = terminal.scrollHeight;
 }
 
