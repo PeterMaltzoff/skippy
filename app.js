@@ -138,26 +138,24 @@ app.post('/architect/generate', async (req, res) => {
 
 app.post('/screenshot', async (req, res) => {
   try {
-    const { width, height } = req.body;
+    const { width, height, url } = req.body;
     
+    if (!url) {
+      throw new Error('URL is required');
+    }
+
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     
     // Set viewport size
     await page.setViewport({ width, height });
     
-    // Navigate to current page (you might need to adjust this URL)
-    // await page.goto('http://localhost:3000' + req.headers.referer.split('3000')[1]);
+    // Navigate to specified URL
+    await page.goto(url);
     
-    // // Wait for content to load
-    // await page.waitForSelector('.cyber-grid');
-    
-    // Test with YouTube
-    await page.goto('https://youtube.com');
-    
-    // Wait for YouTube content to load
-    await page.waitForSelector('#content');
-    
+    // Wait a second for the page to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // Take screenshot
     const screenshot = await page.screenshot();
     
