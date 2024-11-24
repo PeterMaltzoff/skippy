@@ -184,10 +184,10 @@ app.get('/puppet/processes', async (req, res) => {
 
 app.post('/puppet/task', async (req, res) => {
   try {
-    const { width, height, url, processId = 0, task } = req.body;
+    const { width, height, processId = 0, task } = req.body;
     
-    if (!url || !task) {
-      throw new Error('URL and task are required');
+    if (!task) {
+      throw new Error('Task is required');
     }
 
     const process = await browserManager.getOrCreateProcess(processId);
@@ -195,9 +195,6 @@ app.post('/puppet/task', async (req, res) => {
     
     // Set viewport size
     await page.setViewport({ width, height });
-    
-    // Navigate to specified URL
-    await page.goto(url);
     
     // Wait a second for the page to load
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -265,21 +262,11 @@ app.post('/puppet/task', async (req, res) => {
       stream: false
     });
     // Extract JavaScript code from the response
-    const suggestion = response.data.response;
-    let code = suggestion;
+    const action = response.data.response;
+    browserManager.executeCommand(processId, action);
     
-    // Look for code block between triple backticks
-    /*
-    const codeMatch = suggestion.match(/```(?:javascript|js)?\s*([\s\S]*?)\s*```/);
-    if (codeMatch) {
-      code = codeMatch[1].trim();
-    } else {
-      console.log(`No code block found in response: ${suggestion}`);
-    }
-    */
-
     res.json({ 
-      suggestion: code,
+      suggestion: action,
       screenshot: base64Image
     });
     

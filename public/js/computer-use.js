@@ -59,7 +59,6 @@ commandInput.addEventListener('keypress', async (e) => {
         body: JSON.stringify({
           width: 1120,
           height: 1120,
-          url: 'https://www.google.com',
           processId: 0,
           task: command
         })
