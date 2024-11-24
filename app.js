@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const path = require('path');
-const puppeteer = require('puppeteer');
+const browserManager = require('./browserManager');
 
 const app = express();
 const port = 3000;
@@ -135,17 +135,16 @@ app.post('/architect/generate', async (req, res) => {
   
   res.end();
 });
-
-app.post('/screenshot', async (req, res) => {
+app.post('/puppet/screenshot', async (req, res) => {
   try {
-    const { width, height, url } = req.body;
+    const { width, height, url, processId = 0 } = req.body;
     
     if (!url) {
       throw new Error('URL is required');
     }
 
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+    const process = await browserManager.getOrCreateProcess(processId);
+    const { page } = process;
     
     // Set viewport size
     await page.setViewport({ width, height });
@@ -158,8 +157,6 @@ app.post('/screenshot', async (req, res) => {
 
     // Take screenshot
     const screenshot = await page.screenshot();
-    
-    await browser.close();
     
     res.writeHead(200, {
       'Content-Type': 'image/png',
@@ -174,6 +171,22 @@ app.post('/screenshot', async (req, res) => {
   }
 });
 
+app.post('/puppet/stop', async (req, res) => {
+  const { processId } = req.body;
+  await browserManager.stopProcess(processId);
+  res.json({ success: true });
+});
+
+app.get('/puppet/processes', async (req, res) => {
+  const processes = browserManager.getActiveProcesses();
+  res.json({ processes });
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
+});
+
+process.on('SIGINT', async () => {
+  await browserManager.stopAllProcesses();
+  process.exit();
 });

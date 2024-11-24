@@ -1,21 +1,57 @@
 const terminal = document.getElementById('terminal');
 const commandInput = document.getElementById('command-input');
+const processesDiv = document.getElementById('processes');
 
-// Handle command input
+// Add function to update processes display
+async function updateProcesses() {
+  try {
+    const response = await fetch('/puppet/processes');
+    const data = await response.json();
+    
+    processesDiv.innerHTML = data.processes.map(processId => `
+      <div class="flex items-center justify-between p-2 bg-black/40 rounded border border-purple-500/30">
+        <div>
+          <div class="text-sm text-purple-300">Process ID: ${processId}</div>
+          <div class="text-xs text-purple-300/70">Browser Instance</div>
+        </div>
+        <button onclick="stopProcess(${processId})" 
+                class="text-red-400 hover:text-red-300 text-sm">
+          Terminate
+        </button>
+      </div>
+    `).join('') || '<div class="text-purple-300/50 text-sm">No active processes</div>';
+  } catch (error) {
+    console.error('Failed to fetch processes:', error);
+  }
+}
+
+// Add function to stop process
+async function stopProcess(processId) {
+  try {
+    await fetch('/puppet/stop', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ processId })
+    });
+    await updateProcesses();
+  } catch (error) {
+    console.error('Failed to stop process:', error);
+  }
+}
+
+// Update screenshot endpoint in existing code
 commandInput.addEventListener('keypress', async (e) => {
   if (e.key === 'Enter') {
     const command = commandInput.value;
     if (!command.trim()) return;
 
-    // Clear input
     commandInput.value = '';
-
-    // Add command to terminal
     addToTerminal(`> ${command}`);
 
-    // Take screenshot
     try {
-      const response = await fetch('/screenshot', {
+      const response = await fetch('/puppet/screenshot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -23,7 +59,8 @@ commandInput.addEventListener('keypress', async (e) => {
         body: JSON.stringify({
           width: 1120,
           height: 1120,
-          url: 'https://www.google.com'
+          url: 'https://www.google.com',
+          processId: 0
         })
       });
 
@@ -31,14 +68,21 @@ commandInput.addEventListener('keypress', async (e) => {
 
       const blob = await response.blob();
       const imageUrl = URL.createObjectURL(blob);
-
-      // Add screenshot to terminal
       addToTerminal('screenshot:', imageUrl);
+      
+      // Update processes after screenshot
+      await updateProcesses();
     } catch (error) {
       addToTerminal('Error: Failed to capture screenshot', null, true);
     }
   }
 });
+
+// Initial processes load
+document.addEventListener('DOMContentLoaded', updateProcesses);
+
+// Update processes every 5 seconds
+setInterval(updateProcesses, 5000);
 
 function addToTerminal(text, imageUrl = null, isError = false) {
   const div = document.createElement('div');
