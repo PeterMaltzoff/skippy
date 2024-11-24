@@ -252,13 +252,25 @@ app.post('/puppet/task', async (req, res) => {
     // Send to Ollama with the vision model
     const response = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2-vision:11b',
-      prompt: `Given this screenshot and the task "${task}", what should be done? Answer tersely in one sentence.`,
+      role: 'user',
+      prompt: `The users instruction is "${task}". Based on this pixel labeled image of a computer screen, write puppeteer code to perform the next step of the task. You already have the page open. Dont close when done.`,
       images: [base64Image],
       stream: false
     });
+    // Extract JavaScript code from the response
+    const suggestion = response.data.response;
+    let code = '';
+    
+    // Look for code block between triple backticks
+    const codeMatch = suggestion.match(/```(?:javascript|js)?\s*([\s\S]*?)\s*```/);
+    if (codeMatch) {
+      code = codeMatch[1].trim();
+    } else {
+      console.log(`No code block found in response: ${suggestion}`);
+    }
 
     res.json({ 
-      suggestion: response.data.response,
+      suggestion: code,
       screenshot: base64Image
     });
     
