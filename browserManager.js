@@ -59,16 +59,19 @@ class BrowserManager {
     switch (action.toLowerCase()) {
       case 'click':
         const [x, y] = params.map(Number);
+        console.log(`[Process ${processId}] Executing click at coordinates (${x}, ${y})`);
         await page.mouse.click(x, y);
         break;
 
       case 'type':
         const text = params.join(',').replace(/['"]/g, ''); // Handle text with commas and remove quotes
+        console.log(`[Process ${processId}] Typing text: "${text}"`);
         await page.keyboard.type(text);
         break;
 
       case 'scroll':
         const [scrollX, scrollY] = params.map(Number);
+        console.log(`[Process ${processId}] Scrolling to position (${scrollX}, ${scrollY})`);
         await page.evaluate((x, y) => {
           window.scrollTo(x, y);
         }, scrollX, scrollY);
@@ -76,15 +79,18 @@ class BrowserManager {
 
       case 'hover':
         const [hoverX, hoverY] = params.map(Number);
+        console.log(`[Process ${processId}] Hovering at coordinates (${hoverX}, ${hoverY})`);
         await page.mouse.move(hoverX, hoverY);
         break;
 
       case 'gotourl':
-        const url = params[0].replace(/['"]/g, ''); // Remove quotes
+        const url = params[0].replace(/['"]/g, '').replace(/^url=/, ''); // Remove quotes and url= prefix
+        console.log(`[Process ${processId}] Navigating to URL: ${url}`);
         await page.goto(url);
         break;
 
       default:
+        console.error(`[Process ${processId}] Unknown action: ${action}`);
         throw new Error(`Unknown action: ${action}`);
     }
   }

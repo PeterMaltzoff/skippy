@@ -250,13 +250,13 @@ app.post('/puppet/task', async (req, res) => {
     const response = await axios.post('http://localhost:11434/api/generate', {
       model: 'llama3.2-vision:11b',
       role: 'user',
-      prompt: `The users instruction is "${task}". Based on this pixel labeled image of a computer screen, and given a list of possible actions, write the next action to perform.
+      prompt: `Look at the attached image. The users instruction is "${task}". Based on this pixel labeled image of a computer screen, and given a list of possible actions, write the next action to perform.
       The list of possible actions is:
+      - gotourl(url)
       - click(x, y)
       - type(text)
       - scroll(x, y)
       - hover(x, y),
-      - goToUrl(url)
       Only respond with the action to perform with the parameters filled in correctly, no other text.`,
       images: [base64Image],
       stream: false
