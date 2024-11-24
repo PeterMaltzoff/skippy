@@ -51,7 +51,7 @@ commandInput.addEventListener('keypress', async (e) => {
     addToTerminal(`> ${command}`);
 
     try {
-      const response = await fetch('/puppet/screenshot', {
+      const response = await fetch('/puppet/task', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -60,20 +60,26 @@ commandInput.addEventListener('keypress', async (e) => {
           width: 1120,
           height: 1120,
           url: 'https://www.google.com',
-          processId: 0
+          processId: 0,
+          task: command
         })
       });
 
-      if (!response.ok) throw new Error('Screenshot failed');
+      if (!response.ok) throw new Error('Task failed');
 
-      const blob = await response.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      addToTerminal('screenshot:', imageUrl);
+      const data = await response.json();
       
-      // Update processes after screenshot
+      // Create image from base64
+      const imageUrl = `data:image/png;base64,${data.screenshot}`;
+      
+      // Add both the suggestion and screenshot to terminal
+      addToTerminal(`AI Suggestion: ${data.suggestion}`);
+      addToTerminal('Screenshot:', imageUrl);
+      
+      // Update processes after task
       await updateProcesses();
     } catch (error) {
-      addToTerminal('Error: Failed to capture screenshot', null, true);
+      addToTerminal('Error: Failed to process task', null, true);
     }
   }
 });

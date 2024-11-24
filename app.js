@@ -182,6 +182,51 @@ app.get('/puppet/processes', async (req, res) => {
   res.json({ processes });
 });
 
+app.post('/puppet/task', async (req, res) => {
+  try {
+    const { width, height, url, processId = 0, task } = req.body;
+    
+    if (!url || !task) {
+      throw new Error('URL and task are required');
+    }
+
+    const process = await browserManager.getOrCreateProcess(processId);
+    const { page } = process;
+    
+    // Set viewport size
+    await page.setViewport({ width, height });
+    
+    // Navigate to specified URL
+    await page.goto(url);
+    
+    // Wait a second for the page to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Take screenshot
+    const screenshot = await page.screenshot();
+    
+    // Convert screenshot to base64
+    const base64Image = screenshot.toString('base64');
+
+    // Send to Ollama with the vision model
+    const response = await axios.post('http://localhost:11434/api/generate', {
+      model: 'llama3.2-vision:11b',
+      prompt: `Given this screenshot and the task "${task}", what should be done? Answer tersely in one sentence.`,
+      images: [base64Image],
+      stream: false
+    });
+
+    res.json({ 
+      suggestion: response.data.response,
+      screenshot: base64Image
+    });
+    
+  } catch (error) {
+    console.error('Task error:', error);
+    res.status(500).json({ error: 'Failed to process task' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
