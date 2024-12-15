@@ -248,25 +248,59 @@ app.post('/puppet/task', async (req, res) => {
 
     // Send to Ollama with the vision model
     const response = await axios.post('http://localhost:11434/api/generate', {
-      model: 'llama3.2-vision:11b',
+      model: 'llama3.2-vision:11b', 
       role: 'user',
-      prompt: `Look at the attached image. The users instruction is "${task}". Based on this pixel labeled image of a computer screen, and given a list of possible actions, write the next action to perform.
+      format: 'json',
+      prompt: `The users instruction is "${task}". Based on this pixel labeled image of a computer screen, and given a list of possible actions, write the next action to perform.
       The list of possible actions is:
       - gotourl(url)
-      - click(x, y)
+      - click(x, y) 
       - type(text)
       - scroll(x, y)
-      - hover(x, y),
-      Only respond with the action to perform with the parameters filled in correctly, no other text.`,
+
+      Describe the image and what you plan to do in a few words. Then provide a JSON response with two fields:
+      - description: A brief description of what you see and plan to do
+      - action: The exact action command to execute
+      
+      Example 1:
+      {
+        "description": "The image shows a search box that is focused on Google's homepage. I will type 'Hello world' into the search box because its already focused.",
+        "action": "type(\"Hello world\")"
+      }
+
+      Example 2:
+      {
+        "description": "The image depicts the Google Chrome browser's pop-up window for cookie settings. I will click on the 'Reject all cookies' button.",
+        "action": "click(400, 850)"
+      }
+
+      Example 3:
+      {
+        "description": "The image shows a long article that needs scrolling. I will scroll down to read more.",
+        "action": "scroll(0, 500)"
+      }
+
+      Example 4:
+      {
+        "description": "The image shows a navigation bar with 'Products' link. I will navigate to the products page.",
+        "action": "gotourl(\"https://example.com/products\")"
+      }`,
       images: [base64Image],
       stream: false
     });
-    // Extract JavaScript code from the response
-    const action = response.data.response;
-    browserManager.executeCommand(processId, action);
+    // Parse JSON response from Ollama
+    const responseJson = JSON.parse(response.data.response);
+    console.log('🌸 Vision AI Response:', responseJson);
+    
+    // Extract action from JSON and execute
+    const { description, action } = responseJson;
+    console.log('💫 AI Description:', description);
+    console.log('⚡ Executing action:', action);
+    
+    await browserManager.executeCommand(processId, action);
     
     res.json({ 
-      suggestion: action,
+      suggestion: response.data.response,
       screenshot: base64Image
     });
     

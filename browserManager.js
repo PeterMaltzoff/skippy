@@ -47,7 +47,8 @@ class BrowserManager {
     const { page } = process;
 
     // Parse the command string
-    const commandMatch = command.match(/^(\w+)\((.*)\)$/);
+    console.log(`command: ${command}`);
+    const commandMatch = command.match(/^(\w+)\((.*)\)\.?$/);
     if (!commandMatch) {
       throw new Error('Invalid command format');
     }
